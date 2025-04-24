@@ -15,15 +15,15 @@ import {
 import { Response } from 'express';
 import * as crypto from 'crypto';
 
-export type HydraEndpoints = {
+export type OryEndpoints = {
   authorizationUrl: string;
   tokenUrl: string;
   revocationUrl?: string;
   registrationUrl?: string;
 };
 
-export type HydraOptions = {
-  endpoints: HydraEndpoints;
+export type OryOptions = {
+  endpoints: OryEndpoints;
   verifyAccessToken: (token: string) => Promise<AuthInfo>;
   getClient: (
     clientId: string
@@ -39,8 +39,8 @@ export interface SessionData {
   clientCodeChallengeMethod?: string;
 }
 
-export class HydraProvider implements OAuthServerProvider {
-  protected readonly _endpoints: HydraEndpoints;
+export class OryProvider implements OAuthServerProvider {
+  protected readonly _endpoints: OryEndpoints;
   protected readonly _verifyAccessToken: (token: string) => Promise<AuthInfo>;
   protected readonly _getClient: (
     clientId: string
@@ -54,7 +54,7 @@ export class HydraProvider implements OAuthServerProvider {
     request: OAuthTokenRevocationRequest
   ) => Promise<void>;
 
-  constructor(options: HydraOptions) {
+  constructor(options: OryOptions) {
     this._endpoints = options.endpoints;
     this._verifyAccessToken = options.verifyAccessToken;
     this._getClient = options.getClient;

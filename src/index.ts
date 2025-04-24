@@ -11,7 +11,7 @@ import {
 } from '@ory/client-fetch';
 import { mcpAuthRouter } from '@modelcontextprotocol/sdk/server/auth/router.js';
 import { requireBearerAuth } from '@modelcontextprotocol/sdk/server/auth/middleware/bearerAuth.js';
-import { HydraProvider } from './hydraProvider.js';
+import { OryProvider } from './oryProvider.js';
 
 /**
  * This example server demonstrates the deprecated HTTP+SSE transport
@@ -261,7 +261,7 @@ if (!serviceDocumentationUrl) {
   throw new Error('MCP_SERVER_DOCS_URL environment variable is required');
 }
 
-const proxyProvider = new HydraProvider({
+const proxyProvider = new OryProvider({
   endpoints: {
     authorizationUrl: `${projectUrl}/oauth2/auth`,
     tokenUrl: `${projectUrl}/oauth2/token`,

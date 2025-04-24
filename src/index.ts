@@ -107,7 +107,7 @@ const getServer = (): McpServer => {
   // List Projects Tool
   server.tool(
     'listProjects',
-    'List all projects in a give Ory Network workspace',
+    'List all projects in a given Ory Network workspace',
     {
       workspaceId: z.string(),
     },
@@ -140,7 +140,7 @@ const getServer = (): McpServer => {
   // Create Project Tool
   server.tool(
     'createProject',
-    'Create a new project in a give Ory Network workspace',
+    'Create a new project in a given Ory Network workspace',
     {
       name: z.string(),
       workspaceId: z.string(),
@@ -179,7 +179,7 @@ const getServer = (): McpServer => {
   // Get Project Tool
   server.tool(
     'getProject',
-    'Get a project by ID for a give Ory Network workspace',
+    'Get a project by ID for a given Ory Network workspace',
     {
       projectId: z.string(),
     },
@@ -212,7 +212,7 @@ const getServer = (): McpServer => {
   // Patch Project Tool
   server.tool(
     'patchProject',
-    'Patch a project by ID for a give Ory Network workspace',
+    'Patch a project by ID for a given Ory Network workspace',
     {
       projectId: z.string(),
       revisionId: z.string(),

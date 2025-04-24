@@ -105,7 +105,7 @@ The server implements graceful shutdown and proper error handling for:
 
 ## License
 
-Copyright 2024 Ory Corp
+Copyright 2025 Ory Corp
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

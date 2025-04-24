@@ -30,15 +30,6 @@ export type OryOptions = {
   ) => Promise<OAuthClientInformationFull | undefined>;
 };
 
-export interface SessionData {
-  clientId: string;
-  state?: string;
-  redirectUri: string;
-  originalState?: string;
-  clientCodeChallenge?: string;
-  clientCodeChallengeMethod?: string;
-}
-
 export class OryProvider implements OAuthServerProvider {
   protected readonly _endpoints: OryEndpoints;
   protected readonly _verifyAccessToken: (token: string) => Promise<AuthInfo>;

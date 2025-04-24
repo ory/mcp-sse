@@ -26,29 +26,36 @@ import { HydraProvider } from './hydraProvider.js';
 // Load environment variables
 dotenv.config();
 
-// Initialize Ory client
-const apiKey = process.env.ORY_API_KEY;
-if (!apiKey) {
-  throw new Error('ORY_API_KEY environment variable is required');
+// Initialize Ory client for service
+// This is the API key for the Ory Network project and used to validate access_tokens
+// and view clients via the project admin APIs
+const projectApiKey = process.env.ORY_PROJECT_API_KEY;
+if (!projectApiKey) {
+  throw new Error('ORY_PROJECT_API_KEY environment variable is required');
 }
 
-const workspaceId = process.env.ORY_WORKSPACE_ID;
-if (!workspaceId) {
-  throw new Error('ORY_WORKSPACE_ID environment variable is required');
+// This is the API key for the Ory Network workspace and used to view projects via the workspace admin APIs
+const workspaceApiKey = process.env.ORY_WORKSPACE_API_KEY;
+if (!workspaceApiKey) {
+  throw new Error('ORY_WORKSPACE_API_KEY environment variable is required');
 }
 
-const hydraUrl = process.env.HYDRA_URL;
-if (!hydraUrl) {
-  throw new Error('HYDRA_URL environment variable is required');
+const oryBaseApiUrl = process.env.ORY_BASE_API_URL;
+if (!oryBaseApiUrl) {
+  throw new Error('ORY_BASE_API_URL environment variable is required');
 }
 
-const hydraAdminUrl = process.env.HYDRA_ADMIN_URL;
-if (!hydraAdminUrl) {
-  throw new Error('HYDRA_ADMIN_URL environment variable is required');
+const projectUrl = process.env.ORY_PROJECT_URL;
+if (!projectUrl) {
+  throw new Error('ORY_PROJECT_URL environment variable is required');
 }
 
 const oryConfig = new Configuration({
-  accessToken: apiKey,
+  basePath: oryBaseApiUrl,
+  accessToken: workspaceApiKey,
+  headers: {
+    Authorization: `Bearer ${workspaceApiKey}`,
+  },
 });
 
 const projectApi = new ProjectApi(oryConfig);
@@ -62,9 +69,9 @@ type HydraClient = {
 // Function to list OAuth2 clients from Hydra
 const listOAuth2Clients = async (): Promise<Record<string, string[]>> => {
   try {
-    const response = await fetch(`${hydraAdminUrl}/admin/clients`, {
+    const response = await fetch(`${projectUrl}/admin/clients`, {
       headers: {
-        Authorization: `Bearer ${apiKey}`,
+        Authorization: `Bearer ${projectApiKey}`,
         'Content-Type': 'application/json',
       },
     });
@@ -244,27 +251,22 @@ const getServer = (): McpServer => {
 const app = express();
 app.use(express.json());
 
-const redirectUri = process.env.ORY_REDIRECT_URI;
-if (!redirectUri) {
-  throw new Error('ORY_REDIRECT_URI environment variable is required');
-}
-
-const baseUrl = process.env.MCP_BASE_URL;
+const baseUrl = process.env.MCP_SERVER_BASE_URL;
 if (!baseUrl) {
-  throw new Error('MCP_BASE_URL environment variable is required');
+  throw new Error('MCP_SERVER_BASE_URL environment variable is required');
 }
 
-const serviceDocumentationUrl = process.env.MCP_DOCS_URL;
+const serviceDocumentationUrl = process.env.MCP_SERVER_DOCS_URL;
 if (!serviceDocumentationUrl) {
-  throw new Error('MCP_DOCS_URL environment variable is required');
+  throw new Error('MCP_SERVER_DOCS_URL environment variable is required');
 }
 
 const proxyProvider = new HydraProvider({
   endpoints: {
-    authorizationUrl: `${hydraUrl}/oauth2/auth`,
-    tokenUrl: `${hydraUrl}/oauth2/token`,
-    revocationUrl: `${hydraUrl}/oauth2/revoke`,
-    registrationUrl: `${hydraUrl}/oauth2/register`,
+    authorizationUrl: `${projectUrl}/oauth2/auth`,
+    tokenUrl: `${projectUrl}/oauth2/token`,
+    revocationUrl: `${projectUrl}/oauth2/revoke`,
+    registrationUrl: `${projectUrl}/oauth2/register`,
   },
   verifyAccessToken: async (
     token: string
@@ -275,11 +277,11 @@ const proxyProvider = new HydraProvider({
     expiresAt: number;
   }> => {
     try {
-      const response = await fetch(`${hydraAdminUrl}/admin/oauth2/introspect`, {
+      const response = await fetch(`${projectUrl}/admin/oauth2/introspect`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
-          Authorization: `Basic ${Buffer.from(token).toString('base64')}`,
+          Authorization: `Bearer ${projectApiKey}`,
         },
         body: new URLSearchParams({
           token,
@@ -335,7 +337,7 @@ const proxyProvider = new HydraProvider({
 app.use(
   mcpAuthRouter({
     provider: proxyProvider,
-    issuerUrl: new URL(hydraUrl),
+    issuerUrl: new URL(projectUrl),
     baseUrl: new URL(baseUrl),
     serviceDocumentationUrl: new URL(serviceDocumentationUrl),
   })
@@ -427,7 +429,7 @@ app.post(
 );
 
 // Start the server
-const port = process.env.PORT || 3000;
+const port = process.env.MCP_SERVER_PORT || 3000;
 console.log('Starting server...');
 const serverInstance = app
   .listen(port, () => {
